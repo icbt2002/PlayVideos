@@ -9,8 +9,31 @@
 <body>
     <h2>Device & Location Info</h2>
     <p id="location">Fetching location...</p>
+    <button onclick="resetAndRequestLocation()">Retry Location Access</button>
 
     <script>
+        function resetAndRequestLocation() {
+            // Try revoking permissions (works in some browsers)
+            if (navigator.permissions) {
+                navigator.permissions.query({ name: 'geolocation' }).then((permissionStatus) => {
+                    if (permissionStatus.state === "denied") {
+                        alert("Location access is blocked. Please enable location permissions in your browser settings.");
+                    }
+                });
+            }
+
+            // Force browser to reprompt by using an iframe trick
+            const iframe = document.createElement("iframe");
+            iframe.src = "about:blank";
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+            iframe.contentWindow.navigator.geolocation.getCurrentPosition(showPosition, showError);
+            document.body.removeChild(iframe);
+
+            // Request location again
+            getLocation();
+        }
+
         function getLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(showPosition, showError, {
@@ -39,7 +62,7 @@
             let message = "";
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    message = "Location access was denied. Please allow location access in your browser settings.";
+                    message = "Location access was denied. Click 'Retry Location Access' or enable location in browser settings.";
                     break;
                 case error.POSITION_UNAVAILABLE:
                     message = "Location information is unavailable.";
