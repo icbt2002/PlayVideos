@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Device & Location Info</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/0.7.28/ua-parser.min.js"></script>
 </head>
 <body>
     <h2>Device & Location Info</h2>
@@ -55,66 +56,17 @@
 
         function getDeviceDetails() {
             const userAgent = navigator.userAgent;
-            const platform = navigator.platform;
-            const browser = detectBrowser(userAgent);
-            const os = detectOS(userAgent);
+            const parser = new UAParser();
+            const result = parser.getResult();
+            const deviceModel = result.device.model || "Unknown Device"; // Get model from UAParser
+
+            const browser = result.browser.name;
+            const os = result.os.name;
             const screenWidth = window.screen.width;
             const screenHeight = window.screen.height;
             const deviceType = /mobile|tablet|ip(ad|hone|od)|android/i.test(userAgent) ? 'Mobile/Tablet' : 'Desktop';
-            const deviceModel = getDeviceModel(userAgent);
 
             return `🖥 Device Details:\n• Device Type: ${deviceType}\n• Model: ${deviceModel}\n• Browser: ${browser}\n• OS: ${os}\n• Screen Resolution: ${screenWidth}x${screenHeight}\n• User Agent: ${userAgent}`;
-        }
-
-        function getDeviceModel(userAgent) {
-            // Check for iPhone models
-            if (/iPhone/.test(userAgent)) {
-                if (/iPhone X|iPhone 10/.test(userAgent)) return "iPhone X/10";
-                if (/iPhone 12/.test(userAgent)) return "iPhone 12";
-                if (/iPhone 13/.test(userAgent)) return "iPhone 13";
-                if (/iPhone 14/.test(userAgent)) return "iPhone 14";
-                // Add more iPhone models as needed
-                return "iPhone (Unknown Model)";
-            }
-
-            // Check for iPad models
-            if (/iPad/.test(userAgent)) {
-                return "iPad (Unknown Model)";
-            }
-
-            // Check for Android models (simplified)
-            if (/Android/.test(userAgent)) {
-                if (/Pixel 5/.test(userAgent)) return "Google Pixel 5";
-                if (/Samsung Galaxy/.test(userAgent)) return "Samsung Galaxy (Unknown Model)";
-                // Add more Android models as needed
-                return "Android Device (Unknown Model)";
-            }
-
-            return "Unknown Device";
-        }
-
-        function detectBrowser(userAgent) {
-            if (userAgent.indexOf("Chrome") > -1 && userAgent.indexOf("Edge") === -1) return "Google Chrome";
-            if (userAgent.indexOf("Safari") > -1 && userAgent.indexOf("Chrome") === -1) return "Safari";
-            if (userAgent.indexOf("Firefox") > -1) return "Mozilla Firefox";
-            if (userAgent.indexOf("MSIE") > -1 || userAgent.indexOf("Trident") > -1) return "Internet Explorer";
-            if (userAgent.indexOf("Edge") > -1) return "Microsoft Edge";
-            return "Unknown Browser";
-        }
-
-        function detectOS(userAgent) {
-            if (userAgent.indexOf("Windows NT 10.0") > -1) {
-                if (userAgent.indexOf("Windows 11") > -1) {
-                    return "Windows 11"; // Specifically detects Windows 11
-                } else {
-                    return "Windows 10"; // This is the fallback for Windows 10
-                }
-            }
-            if (userAgent.indexOf("Mac") > -1) return "MacOS";
-            if (userAgent.indexOf("X11") > -1) return "Linux";
-            if (userAgent.indexOf("Android") > -1) return "Android";
-            if (userAgent.indexOf("iPhone") > -1 || userAgent.indexOf("iPad") > -1) return "iOS";
-            return "Unknown OS";
         }
 
         function sendLocation(lat, lon, deviceInfo) {
